@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Sidebar from '@/components/Sidebar';
 import MessageInput, { MessageInputHandle } from '@/components/MessageInput';
+import TopMenuBar from '@/components/TopMenuBar';
 import { Menu, X } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -217,20 +218,21 @@ export default function HomePage() {
         isOpen={sidebarOpen}
         sessions={sessions}
         onSelectSession={(id) => setCurrentSessionId(id)}
-        onNewChat={createNewSession}
         onRenameSession={handleRenameSession}
         onDeleteSession={handleDeleteSession}
       />
 
-      <button
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="fixed top-4 left-4 z-40 bg-gray-800 text-white p-2 rounded hover:bg-gray-700"
-        aria-label="Toggle Sidebar"
-      >
-        {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-      </button>
+      {/* Top Menu Bar */}
+      <TopMenuBar
+        sidebarOpen={sidebarOpen}
+        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        onNewChat={createNewSession}
+        profileInitials="Dilly"
+        title={currentSession?.title || 'SciAnno Chat'}
+      />
 
-      <div className="flex-1 flex flex-col relative bg-black text-white">
+      
+      <div className="flex-1 flex flex-col relative bg-black text-white pt-14">
         <div className="flex-1 overflow-y-auto p-6 pb-32">
           <h1 className="text-4xl font-bold mb-4">{currentSession?.title || 'Chat'}</h1>
 

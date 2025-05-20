@@ -11,7 +11,6 @@ type SidebarProps = {
   isOpen: boolean;
   sessions: Session[];
   onSelectSession: (id: string) => void;
-  onNewChat: () => void;
   onRenameSession: (id: string, title: string) => void;
   onDeleteSession: (id: string) => void;
 };
@@ -20,7 +19,6 @@ export default function Sidebar({
   isOpen,
   sessions,
   onSelectSession,
-  onNewChat,
   onRenameSession,
   onDeleteSession,
 }: SidebarProps) {
@@ -41,13 +39,7 @@ export default function Sidebar({
     >
       {isOpen && (
         <>
-          <button
-            onClick={onNewChat}
-            className="w-full mb-6 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded text-sm"
-          >
-            + New Chat
-          </button>
-
+          
           <h2 className="text-xl font-bold mb-4">Chats</h2>
           <ul className="space-y-2 text-sm">
             {sessions.map((s) => (
