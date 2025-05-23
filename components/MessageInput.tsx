@@ -1,7 +1,8 @@
 'use client';
 
 import { useImperativeHandle, forwardRef, useRef, useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Paperclip } from 'lucide-react';
+import { useMessageInput } from '@/hooks/useMessageInput';
 
 type MessageInputProps = {
   onSend: (message: string) => void;
@@ -15,33 +16,35 @@ export type MessageInputHandle = {
 
 const MessageInput = forwardRef<MessageInputHandle, MessageInputProps>(
   ({ onSend, disabled = false }, ref) => {
-    const [message, setMessage] = useState('');
-    const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+    
+    const {
+      message,
+      setMessage,
+      textareaRef,
+      handleFileChange,
+      handleSubmit,
+    } = useMessageInput(onSend, disabled);
 
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      const trimmed = message.trim();
-      if (!trimmed || disabled) return;
-      onSend(trimmed);
-      setMessage('');
-    };
-
-    useImperativeHandle(ref, () => ({
-      reset: () => setMessage(''),
-      focus: () => textareaRef.current?.focus(),
-    }));
-
-    // Focus textarea on mount
-    useEffect(() => {
-      textareaRef.current?.focus();
-    }, []);
-
+    
     return (
       <form
         onSubmit={handleSubmit}
         className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-full max-w-2xl px-4 z-30"
       >
         <div className="bg-white rounded-xl shadow-md p-3 flex items-center">
+          {/* File upload button */}
+          <label className="mr-2 cursor-pointer flex items-center">
+            <input
+              type="file"
+              className="hidden"
+              onChange={handleFileChange}
+              disabled={disabled}
+            />
+            <Paperclip
+              size={20}
+              className={`text-gray-500 hover:text-gray-800 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+            />
+          </label>
           <textarea
             ref={textareaRef}
             value={message}
@@ -69,6 +72,7 @@ const MessageInput = forwardRef<MessageInputHandle, MessageInputProps>(
     );
   }
 );
+
 
 MessageInput.displayName = 'MessageInput';
 export default MessageInput;

@@ -17,7 +17,7 @@ export default function TopMenuBar({
   title = 'SciAnno Chat',
 }: TopMenuBarProps) {
   return (
-    <div className="fixed top-0 left-0 w-full z-50 flex items-center justify-between bg-gray-900 text-white h-14 px-4 shadow">
+    <div className="fixed top-0 left-0 w-full z-50 flex items-center justify-between bg-gray-800 text-white h-14 px-4 shadow">
       {/* Left: Sidebar Toggle & New Chat */}
       <div className="flex items-center gap-2">
         {/* Sidebar Toggle Icon with Tooltip */}
