@@ -74,10 +74,14 @@ export default function HomePage() {
     }
   };
 
-  const handleFileSend = (fileName: string) => {
-    // Add the file name as a message to the current session
+  const handleFileSend = (fileMsg: string, fileName?: string) => {
+  // Add the file name as a user message
+  if (fileName) {
     addMessageToCurrentSession('user', `Uploaded file: ${fileName}`);
-  };
+  }
+  // Add the API response as a bot message
+  addMessageToCurrentSession('bot', fileMsg);
+};
 
   // Scroll to bottom on new message
   const scrollToBottom = () => {

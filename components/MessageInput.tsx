@@ -6,7 +6,7 @@ import { useMessageInput } from '@/hooks/useMessageInput';
 
 type MessageInputProps = {
   onSend: (message: string) => void;
-  onFileSend?: (fileName: string) => void;
+  onFileSend?: (fileMsg: string, fileName?: string) => void
   disabled?: boolean;
 };
 

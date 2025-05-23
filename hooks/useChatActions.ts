@@ -1,5 +1,8 @@
 import { MessageInputHandle } from "@/components/MessageInput";
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+
 export function useChatActions({
   sessions,
   setSessions,
@@ -51,7 +54,7 @@ export function useChatActions({
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 5000);
 
-      const response = await fetch('https://dev.dilly.cloud/api/echo', {
+      const response = await fetch(`${apiUrl}/api/echo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text }),
