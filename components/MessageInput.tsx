@@ -1,11 +1,12 @@
 'use client';
 
-import { useImperativeHandle, forwardRef, useRef, useEffect, useState } from 'react';
+import { useImperativeHandle, forwardRef, useRef } from 'react';
 import { Loader2, Paperclip } from 'lucide-react';
 import { useMessageInput } from '@/hooks/useMessageInput';
 
 type MessageInputProps = {
   onSend: (message: string) => void;
+  onFileSend?: (fileName: string) => void;
   disabled?: boolean;
 };
 
@@ -16,14 +17,14 @@ export type MessageInputHandle = {
 };
 
 const MessageInput = forwardRef<MessageInputHandle, MessageInputProps>(
-  ({ onSend, disabled = false }, ref) => {
+  ({ onSend, onFileSend, disabled = false }, ref) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null!);
     const {
       message,
       setMessage,
       handleFileChange,
       handleSubmit,
-    } = useMessageInput(onSend, disabled, textareaRef);
+    } = useMessageInput(onSend, disabled, textareaRef, onFileSend);
 
     useImperativeHandle(ref, () => ({
       focusInput: () => {
@@ -38,7 +39,6 @@ const MessageInput = forwardRef<MessageInputHandle, MessageInputProps>(
       },
     }));
 
-    
     return (
       <form
         onSubmit={handleSubmit}
@@ -67,7 +67,7 @@ const MessageInput = forwardRef<MessageInputHandle, MessageInputProps>(
                 e.preventDefault();
                 handleSubmit(e);
               }
-            }}  
+            }}
             rows={1}
             placeholder={disabled ? 'Waiting for response...' : 'Ask me...'}
             className="w-full text-black resize-none bg-transparent focus:outline-none disabled:opacity-60"
@@ -85,7 +85,6 @@ const MessageInput = forwardRef<MessageInputHandle, MessageInputProps>(
     );
   }
 );
-
 
 MessageInput.displayName = 'MessageInput';
 export default MessageInput;

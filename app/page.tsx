@@ -74,6 +74,11 @@ export default function HomePage() {
     }
   };
 
+  const handleFileSend = (fileName: string) => {
+    // Add the file name as a message to the current session
+    addMessageToCurrentSession('user', `Uploaded file: ${fileName}`);
+  };
+
   // Scroll to bottom on new message
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -133,7 +138,7 @@ export default function HomePage() {
             <div ref={bottomRef} />
           </div>
         </div>
-        <MessageInput ref={inputRef} onSend={handleSend} disabled={isTyping} />
+        <MessageInput ref={inputRef} onSend={handleSend} onFileSend={handleFileSend}  disabled={isTyping} />
       </div>
     </div>
   );

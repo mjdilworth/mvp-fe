@@ -1,21 +1,23 @@
-//import { useRef, useState } from 'react';
-import { useState, RefObject } from 'react';
+import { useState } from 'react';
 
 export function useMessageInput(
   onSend: (msg: string) => void,
   disabled: boolean,
-  textareaRef: React.RefObject<HTMLTextAreaElement>
+  textareaRef: React.RefObject<HTMLTextAreaElement>,
+  onFileSend?: (fileName: string) => void // <-- add this
 ) {
   const [message, setMessage] = useState('');
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement | null>) => {
     const file = e.target.files?.[0];
     if (file) {
-      alert(`Selected file: ${file.name}`);
+      if (onFileSend) {
+        onFileSend(file.name); // send file name to session
+      }
       e.target.value = '';
     }
     setTimeout(() => {
-        textareaRef.current?.focus();
+      textareaRef.current?.focus();
     }, 50);
   };
 
@@ -25,9 +27,8 @@ export function useMessageInput(
     onSend(message.trim());
     setMessage('');
     setTimeout(() => {
-        textareaRef.current?.focus();
+      textareaRef.current?.focus();
     }, 50);
-    
   };
 
   return {
