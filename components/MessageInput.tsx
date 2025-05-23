@@ -10,20 +10,33 @@ type MessageInputProps = {
 };
 
 export type MessageInputHandle = {
+  focusInput: () => void;
   reset: () => void;
   focus: () => void;
 };
 
 const MessageInput = forwardRef<MessageInputHandle, MessageInputProps>(
   ({ onSend, disabled = false }, ref) => {
-    
+    const textareaRef = useRef<HTMLTextAreaElement>(null!);
     const {
       message,
       setMessage,
-      textareaRef,
       handleFileChange,
       handleSubmit,
-    } = useMessageInput(onSend, disabled);
+    } = useMessageInput(onSend, disabled, textareaRef);
+
+    useImperativeHandle(ref, () => ({
+      focusInput: () => {
+        console.log('Focusing input');
+        textareaRef.current?.focus();
+      },
+      reset: () => {
+        setMessage('');
+      },
+      focus: () => {
+        textareaRef.current?.focus();
+      },
+    }));
 
     
     return (

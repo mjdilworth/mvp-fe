@@ -41,6 +41,7 @@ export function useChatActions({
     );
   };
 
+
   const handleSend = async (text: string) => {
     addMessageToCurrentSession('user', text);
     setStreamingContent('');
@@ -75,6 +76,10 @@ export function useChatActions({
           clearInterval(interval);
           addMessageToCurrentSession('bot', fullResponse);
           setIsTyping(false);
+          // Focus the input after bot response
+        setTimeout(() => {
+  inputRef.current?.focusInput?.();
+}, 50);
         }
       }, 30);
     } catch (err) {
@@ -84,6 +89,10 @@ export function useChatActions({
         'Sorry, there was an error. Please try again.',
         'error'
       );
+      // Focus the input even on error
+   setTimeout(() => {
+  inputRef.current?.focusInput?.();
+}, 50);
     }
   };
 
