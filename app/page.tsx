@@ -1,5 +1,4 @@
 'use client';
-
 import { useRef, useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import TopMenuBar from '@/components/TopMenuBar';
@@ -74,14 +73,17 @@ export default function HomePage() {
     }
   };
 
+  // File upload streaming handler
   const handleFileSend = (fileMsg: string, fileName?: string) => {
-  // Add the file name as a user message
-  if (fileName) {
-    addMessageToCurrentSession('user', `Uploaded file: ${fileName}`);
-  }
-  // Add the API response as a bot message
-  addMessageToCurrentSession('bot', fileMsg);
-};
+    // Add the file name as a user message (only once, when fileName is present)
+    if (fileName) {
+      addMessageToCurrentSession('user', `Uploaded file: ${fileName}`);
+    }
+    // Only add the bot message when streaming is done (fileName is present)
+    if (fileName) {
+      addMessageToCurrentSession('bot', fileMsg);
+    }
+  };
 
   // Scroll to bottom on new message
   const scrollToBottom = () => {
@@ -131,7 +133,7 @@ export default function HomePage() {
                 </div>
               </div>
             ))}
-            {/* Streaming content (for bot typing) */}
+            {/* Streaming content (for bot typing and file upload) */}
             {isTyping && streamingContent && (
               <div className="flex justify-start">
                 <div className="max-w-lg rounded-lg p-3 bg-gray-800 text-white text-left">
@@ -142,7 +144,16 @@ export default function HomePage() {
             <div ref={bottomRef} />
           </div>
         </div>
-        <MessageInput ref={inputRef} onSend={handleSend} onFileSend={handleFileSend}  disabled={isTyping} />
+        <MessageInput
+          ref={inputRef}
+          onSend={handleSend}
+          onFileSend={handleFileSend}
+          disabled={isTyping}
+          isTyping={isTyping}
+          setIsTyping={setIsTyping}
+          streamingContent={streamingContent}
+          setStreamingContent={setStreamingContent}
+        />
       </div>
     </div>
   );
