@@ -1,9 +1,12 @@
 'use client';
-import { useRef, useState } from 'react';
+
+import { useEffect, useRef, useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import TopMenuBar from '@/components/TopMenuBar';
 import MessageInput, { MessageInputHandle } from '@/components/MessageInput';
+import { useMessageInput } from '@/hooks/useMessageInput';
 import { useChatActions } from '@/hooks/useChatActions';
+import { useFileUpload } from '@/hooks/useFileUpload';
 
 type Message = {
   sender: 'user' | 'bot';
@@ -19,25 +22,21 @@ type Session = {
 };
 
 export default function HomePage() {
-  // State
   const [sessions, setSessions] = useState<Session[]>([
-    {
-      id: 'default',
-      title: 'New Chat',
-      messages: [],
-    },
+    { id: 'default', title: 'New Chat', messages: [] },
   ]);
+  const [streamingContent, setStreamingContent] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const [currentSessionId, setCurrentSessionId] = useState('default');
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isTyping, setIsTyping] = useState(false);
-  const [streamingContent, setStreamingContent] = useState('');
+
   const inputRef = useRef<MessageInputHandle>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Helpers
   const currentSession = sessions.find((s) => s.id === currentSessionId);
 
-  // Chat actions (from custom hook)
+  // Chat logic
   const { addMessageToCurrentSession, handleSend } = useChatActions({
     sessions,
     setSessions,
@@ -48,13 +47,24 @@ export default function HomePage() {
     currentSessionId,
   });
 
-  // Session management
+  // File upload logic
+  const { handleFileChange } = useFileUpload({
+    setIsTyping,
+    setStreamingContent,
+    addMessageToCurrentSession,
+    inputRef,
+  });
+
+  // Message input logic
+  const {
+    message,
+    setMessage,
+    handleSubmit,
+  } = useMessageInput(handleSend, textareaRef);
+
   const createNewSession = () => {
     const newId = Math.random().toString(36).slice(2);
-    setSessions([
-      ...sessions,
-      { id: newId, title: 'New Chat', messages: [] },
-    ]);
+    setSessions([...sessions, { id: newId, title: 'New Chat', messages: [] }]);
     setCurrentSessionId(newId);
   };
 
@@ -73,27 +83,9 @@ export default function HomePage() {
     }
   };
 
-  // File upload streaming handler
-  const handleFileSend = (fileMsg: string, fileName?: string) => {
-    // Add the file name as a user message (only once, when fileName is present)
-    if (fileName) {
-      addMessageToCurrentSession('user', `Uploaded file: ${fileName}`);
-    }
-    // Only add the bot message when streaming is done (fileName is present)
-    if (fileName) {
-      addMessageToCurrentSession('bot', fileMsg);
-    }
-  };
-
-  // Scroll to bottom on new message
-  const scrollToBottom = () => {
-    setTimeout(() => {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-  };
-
-  // Scroll when messages or streamingContent changes
-  // (You may want to use useEffect here if needed)
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [currentSession?.messages.length, streamingContent, isTyping]);
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -133,7 +125,7 @@ export default function HomePage() {
                 </div>
               </div>
             ))}
-            {/* Streaming content (for bot typing and file upload) */}
+
             {isTyping && streamingContent && (
               <div className="flex justify-start">
                 <div className="max-w-lg rounded-lg p-3 bg-gray-800 text-white text-left">
@@ -141,18 +133,19 @@ export default function HomePage() {
                 </div>
               </div>
             )}
+
             <div ref={bottomRef} />
           </div>
         </div>
+
         <MessageInput
           ref={inputRef}
-          onSend={handleSend}
-          onFileSend={handleFileSend}
+          message={message}
+          setMessage={setMessage}
           disabled={isTyping}
           isTyping={isTyping}
-          setIsTyping={setIsTyping}
-          streamingContent={streamingContent}
-          setStreamingContent={setStreamingContent}
+          handleFileChange={handleFileChange}
+          handleSubmit={handleSubmit}
         />
       </div>
     </div>

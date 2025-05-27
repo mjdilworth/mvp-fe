@@ -15,7 +15,7 @@ export function useChatActions({
   sessions: any[];
   setSessions: React.Dispatch<React.SetStateAction<any[]>>;
   setIsTyping: (v: boolean) => void;
-  setStreamingContent: (v: string) => void;
+  setStreamingContent: React.Dispatch<React.SetStateAction<string>>;
   inputRef: React.RefObject<MessageInputHandle | null>;
   setCurrentSessionId: (id: string) => void;
   currentSessionId: string;
@@ -46,58 +46,58 @@ export function useChatActions({
 
 
   const handleSend = async (text: string) => {
-    addMessageToCurrentSession('user', text);
-    setStreamingContent('');
-    setIsTyping(true);
+  addMessageToCurrentSession("user", text);
+  setStreamingContent(""); // clear before starting
+  setIsTyping(true);
 
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 5000);
+  try {
+    const response = await fetch(`${apiUrl}/api/v1/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text }),
+    });
 
-      const response = await fetch(`${apiUrl}/api/echo`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeout);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
-      }
-
-      const data = await response.json();
-      const fullResponse = data.reply || 'No reply received.';
-
-      let i = 0;
-      const interval = setInterval(() => {
-        i++;
-        setStreamingContent(fullResponse.slice(0, i));
-        if (i >= fullResponse.length) {
-          clearInterval(interval);
-          addMessageToCurrentSession('bot', fullResponse);
-          setIsTyping(false);
-          // Focus the input after bot response
-        setTimeout(() => {
-  inputRef.current?.focusInput?.();
-}, 50);
-        }
-      }, 30);
-    } catch (err) {
-      setIsTyping(false);
-      addMessageToCurrentSession(
-        'bot',
-        'Sorry, there was an error. Please try again.',
-        'error'
-      );
-      // Focus the input even on error
-   setTimeout(() => {
-  inputRef.current?.focusInput?.();
-}, 50);
+    if (!response.ok || !response.body) {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
     }
-  };
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullResponse = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+
+      console.debug("[stream chunk]", chunk); // ✅ Inspect in console
+      fullResponse += chunk;
+      setStreamingContent((prev) => prev + chunk);
+    }
+
+    addMessageToCurrentSession("bot", fullResponse);
+    setIsTyping(false);
+    setStreamingContent('');
+    setTimeout(() => {
+      inputRef.current?.focusInput?.();
+    }, 50);
+  } catch (err) {
+    console.error("Streaming error:", err);
+    addMessageToCurrentSession(
+      "bot",
+      "Sorry, there was an error. Please try again.",
+      "error"
+    );
+  } finally {
+    setIsTyping(false);
+    // optional: briefly keep streamed message visible
+    setTimeout(() => setStreamingContent(""), 200);
+    setTimeout(() => {
+      inputRef.current?.focusInput?.();
+    }, 50);
+  }
+};
 
   
   return {
