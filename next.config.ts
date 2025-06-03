@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   trailingSlash: true, // required for static export
   basePath: '',        // keep root-relative
   assetPrefix: '',
+  devIndicators: false,
 };
 
 export default nextConfig;

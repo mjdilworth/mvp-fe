@@ -4,8 +4,8 @@ import type { Metadata } from 'next';
 import { ReactNode } from 'react';
 
 export const metadata: Metadata = {
-  title: 'MVP Application',
-  description: 'MVP application',
+  title: 'Jack Application',
+  description: 'Jack application',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
